@@ -68,10 +68,11 @@ func printEnvVars() {
 		{"BUYNUM", buyNum},
 	}
 
-	log.Println("ALL ENV：")
+	log.Println("**********ALL ENV**********：")
 	for _, v := range envVars {
 		log.Printf("%-12s = %s\n", v.Name, v.Val)
 	}
+	log.Println("***************************：")
 }
 
 func runTask() {
@@ -124,7 +125,7 @@ func runTask() {
 
 	if !foundAvailable {
 		log.Println("No record to buy")
-		log.Println("***********************************")
+		log.Println("*******************************************************")
 		return
 	}
 
@@ -291,16 +292,11 @@ func sendTelegramMsg(botToken, chatID, message string) error {
 
 func main() {
 	printEnvVars()
-	buyNumInt, _ := strconv.Atoi(buyNum)
-	freq, err := strconv.Atoi(frequency)
-	if err != nil {
-		log.Println("Error converting frequency:", err)
-		return
-	}
+	buyNumInt, _ = strconv.Atoi(buyNum)
+	freq, _ := strconv.Atoi(frequency)
+
 	for {
-		if boughtNum < buyNumInt {
-			runTask()
-		}
+		runTask()
 		time.Sleep(time.Duration(freq) * time.Second)
 	}
 }
