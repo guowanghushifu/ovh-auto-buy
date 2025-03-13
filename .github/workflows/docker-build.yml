@@ -25,9 +25,17 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and push Docker image
+      - name: Generate Date Tag
+        id: date
         run: |
-          DATE_TAG=$(TZ=Asia/Singapore date +'%Y.%m.%d')
-          docker build -t --no-cache guowanghushifu/ovh-auto-buy:$DATE_TAG -t guowanghushifu/ovh-auto-buy:latest .
-          docker push guowanghushifu/ovh-auto-buy:$DATE_TAG
-          docker push guowanghushifu/ovh-auto-buy:latest
+          echo "DATE_TAG=$(TZ=Asia/Singapore date +'%Y.%m.%d')" >> $GITHUB_OUTPUT
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            guowanghushifu/ovh-auto-buy:${{ steps.date.outputs.DATE_TAG }}
+            guowanghushifu/ovh-auto-buy:latest
+          no-cache: true
