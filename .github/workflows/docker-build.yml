@@ -27,7 +27,7 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          DATE_TAG=$(TZ=Asia/Shanghai date +'%Y.%m.%d')
+          DATE_TAG=$(TZ=Asia/Singapore date +'%Y.%m.%d')
           docker build -t --no-cache guowanghushifu/ovh-auto-buy:$DATE_TAG -t guowanghushifu/ovh-auto-buy:latest .
           docker push guowanghushifu/ovh-auto-buy:$DATE_TAG
           docker push guowanghushifu/ovh-auto-buy:latest
