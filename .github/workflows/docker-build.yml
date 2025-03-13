@@ -28,6 +28,6 @@ jobs:
       - name: Build and push Docker image
         run: |
           DATE_TAG=$(TZ=Asia/Shanghai date +'%Y.%m.%d')
-          docker build -t --no-cache ${{ secrets.DOCKER_USERNAME }}/ovh-auto-buy:$DATE_TAG -t ${{ secrets.DOCKER_USERNAME }}/ovh-auto-buy:latest .
-          docker push ${{ secrets.DOCKER_USERNAME }}/ovh-auto-buy:$DATE_TAG
-          docker push ${{ secrets.DOCKER_USERNAME }}/ovh-auto-buy:latest
+          docker build -t --no-cache guowanghushifu/ovh-auto-buy:$DATE_TAG -t guowanghushifu/ovh-auto-buy:latest .
+          docker push guowanghushifu/ovh-auto-buy:$DATE_TAG
+          docker push guowanghushifu/ovh-auto-buy:latest
