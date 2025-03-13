@@ -1,7 +1,7 @@
 package main
 
 /**
- * Source code modified from: https://blog.yessure.org/index.php/archives/203
+ * Source code modified from: https://blog.yessure.org/index.php/archives/203 Mod by guowanghushifu
  */
 
 import (
