@@ -27,13 +27,14 @@ services:
             - FQN=24sk20.ram-32g-ecc-2133.softraid-2x450nvme
             - OPTIONS=bandwidth-300-24sk,ram-32g-ecc-2133-24sk20,softraid-2x450nvme-24sk20
             - AUTOPAY=true
-            - FREQUENCY=15
+            - FREQUENCY=30
             - BUYNUM=1
+            - TZ=Asia/Shanghai
         image: guowanghushifu/ovh-auto-buy:latest
 ```
 Some Env Para Explain:
 - BUYNUM: How many servers to buy, eg. 2
 - DATACENTER: Which Datacenter to buy, eg. sbg,rbx,fra
-- FREQUENCY: How many seconds to sleep between each try
-- AUTOPAY: Auto pay money?
+- FREQUENCY: How many seconds to sleep between each try, eg. 30
+- AUTOPAY: Auto pay money, eg. true
 
