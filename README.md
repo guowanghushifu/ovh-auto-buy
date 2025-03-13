@@ -15,13 +15,13 @@ services:
     ovh:
         container_name: ovh
         environment:
-            - APP_KEY=123456
-            - APP_SECRET=123456
-            - CONSUMER_KEY=123456
+            - APP_KEY=your_ovh_app_key
+            - APP_SECRET=your_ovh_app_secret
+            - CONSUMER_KEY=your_ovh_consumer_key
             - REGION=ovh-eu
             - ZONE=IE
-            - TG_TOKEN=123456:123456
-            - TG_CHATID=-100123456
+            - TG_TOKEN=your_telegram_token
+            - TG_CHATID=your_telegram_chat_id
             - DATACENTER=sbg,rbx,fra
             - PLANCODE=24sk20
             - FQN=24sk20.ram-32g-ecc-2133.softraid-2x450nvme
@@ -33,8 +33,8 @@ services:
         image: guowanghushifu/ovh-auto-buy:latest
 ```
 Some Env Para Explain:
-- BUYNUM: How many servers to buy, eg. 2
-- DATACENTER: Which Datacenter to buy, eg. sbg,rbx,fra
-- FREQUENCY: How many seconds to sleep between each try, eg. 30
-- AUTOPAY: Auto pay money, eg. true
+- BUYNUM: How many servers to buy, e.g. 2
+- DATACENTER: Which Datacenter to buy, e.g. sbg,rbx,fra
+- FREQUENCY: How many seconds to sleep between each try, e.g. 30
+- AUTOPAY: Auto pay money, e.g. true
 
