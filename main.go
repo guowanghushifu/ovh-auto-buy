@@ -47,6 +47,33 @@ func Contains(arr []string, target string) bool {
 	return false
 }
 
+func printEnvVars() {
+	envVars := []struct {
+		Name string
+		Val  string
+	}{
+		{"APP_KEY", appKey},
+		{"APP_SECRET", appSecret},
+		{"CONSUMER_KEY", consumerKey},
+		{"REGION", region},
+		{"TG_TOKEN", tgtoken},
+		{"TG_CHATID", tgchatid},
+		{"ZONE", zone},
+		{"PLANCODE", plancode},
+		{"FQN", fqncode},
+		{"OPTIONS", optionsenv},
+		{"DATACENTER", datacenterenv},
+		{"AUTOPAY", autopay},
+		{"FREQUENCY", frequency},
+		{"BUYNUM", buyNum},
+	}
+
+	log.Println("ALL ENV：")
+	for _, v := range envVars {
+		log.Printf("%-12s = %s\n", v.Name, v.Val)
+	}
+}
+
 func runTask() {
 
 	client, err := ovh.NewClient(region, appKey, appSecret, consumerKey)
@@ -77,10 +104,10 @@ func runTask() {
 				availability := dc["availability"].(string)
 				datacenter = dc["datacenter"].(string)
 
-				fmt.Printf("FQN: %s\n", fqn)
-				fmt.Printf("Availability: %s\n", availability)
-				fmt.Printf("Datacenter: %s\n", datacenter)
-				fmt.Println("------------------------")
+				log.Printf("FQN: %s\n", fqn)
+				log.Printf("Availability: %s\n", availability)
+				log.Printf("Datacenter: %s\n", datacenter)
+				log.Println("------------------------")
 
 				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && fqncode == fqn {
 					foundAvailable = true
@@ -89,7 +116,7 @@ func runTask() {
 			}
 
 			if foundAvailable {
-				fmt.Printf("Proceeding to next step with FQN: %s Datacenter: %s\n", fqn, datacenter)
+				log.Printf("Proceeding to next step with FQN: %s Datacenter: %s\n", fqn, datacenter)
 				break
 			}
 		}
@@ -97,13 +124,14 @@ func runTask() {
 
 	if !foundAvailable {
 		log.Println("No record to buy")
+		log.Println("***********************************")
 		return
 	}
 
 	msg_available := fmt.Sprintf("🔥 有货啦: \n地区: %s\n型号: %s\n配置: %s\n", datacenter, plancode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_available)
 
-	fmt.Println("Create cart")
+	log.Println("Create cart")
 	var cartResult map[string]interface{}
 	err = client.Post("/order/cart", map[string]interface{}{
 		"ovhSubsidiary": zone,
@@ -114,16 +142,16 @@ func runTask() {
 	}
 
 	cartID := cartResult["cartId"].(string)
-	fmt.Printf("Cart ID: %s\n", cartID)
+	log.Printf("Cart ID: %s\n", cartID)
 
-	fmt.Println("Assign cart")
+	log.Println("Assign cart")
 	err = client.Post("/order/cart/"+cartID+"/assign", nil, nil)
 	if err != nil {
 		log.Printf("Failed to assign cart: %v\n", err)
 		return
 	}
 
-	fmt.Println("Put item into cart")
+	log.Println("Put item into cart")
 	var itemResult map[string]interface{}
 	err = client.Post("/order/cart/"+cartID+"/eco", map[string]interface{}{
 		"planCode":    planCode,
@@ -146,9 +174,9 @@ func runTask() {
 		return
 	}
 
-	fmt.Printf("Item ID: %s\n", itemID)
+	log.Printf("Item ID: %s\n", itemID)
 
-	fmt.Println("Checking required configuration")
+	log.Println("Checking required configuration")
 	var requiredConfig []map[string]interface{}
 	err = client.Get("/order/cart/"+cartID+"/item/"+itemID+"/requiredConfiguration", &requiredConfig)
 	if err != nil {
@@ -173,7 +201,7 @@ func runTask() {
 	}
 
 	for _, config := range configurations {
-		fmt.Printf("Configure %s\n", config["label"])
+		log.Printf("Configure %s\n", config["label"])
 		err = client.Post("/order/cart/"+cartID+"/item/"+itemID+"/configuration", map[string]interface{}{
 			"label": config["label"],
 			"value": config["value"],
@@ -184,7 +212,7 @@ func runTask() {
 		}
 	}
 
-	fmt.Println("Add options")
+	log.Println("Add options")
 	options := strings.Split(optionsenv, ",")
 
 	itemIDInt, _ := strconv.Atoi(itemID)
@@ -202,7 +230,7 @@ func runTask() {
 		}
 	}
 
-	fmt.Println("Checkout")
+	log.Println("Checkout")
 	var checkoutResult map[string]interface{}
 	err = client.Get("/order/cart/"+cartID+"/checkout", &checkoutResult)
 	if err != nil {
@@ -212,7 +240,7 @@ func runTask() {
 
 	autopayValue, err := strconv.ParseBool(autopay)
 	if err != nil {
-		fmt.Println("AUTOPAY value is invalid:", err)
+		log.Println("AUTOPAY value is invalid:", err)
 		return
 	}
 
@@ -262,10 +290,11 @@ func sendTelegramMsg(botToken, chatID, message string) error {
 }
 
 func main() {
+	printEnvVars()
 	buyNumInt, _ := strconv.Atoi(buyNum)
 	freq, err := strconv.Atoi(frequency)
 	if err != nil {
-		fmt.Println("Error converting frequency:", err)
+		log.Println("Error converting frequency:", err)
 		return
 	}
 	for {
