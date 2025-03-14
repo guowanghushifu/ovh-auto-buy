@@ -37,6 +37,7 @@ var (
 
 var boughtNum = 0
 var buyNumInt = 1
+var triedTimes = 0
 
 func Contains(arr []string, target string) bool {
 	for _, s := range arr {
@@ -93,6 +94,10 @@ func runTask() {
 	foundAvailable := false
 	var fqn, planCode, datacenter string
 	datacenterOptions := strings.Split(datacenterenv, ",")
+	triedTimes += 1
+	log.Println("-----------------------------------------------")
+	log.Printf("Number of runs: %d\n", triedTimes)
+	log.Println("-----------------------------------------------")
 
 	for _, item := range result {
 		if item["planCode"] == plancode {
@@ -125,7 +130,7 @@ func runTask() {
 
 	if !foundAvailable {
 		log.Println("No record to buy")
-		log.Println("*******************************************************")
+		log.Println("***********************************************")
 		return
 	}
 
