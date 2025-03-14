@@ -33,6 +33,7 @@ var (
 	autopay       = os.Getenv("AUTOPAY")      // 是否自动支付, e.g. true
 	frequency     = os.Getenv("FREQUENCY")    // 检查频率单位为秒, e.g. 5
 	buyNum        = os.Getenv("BUYNUM")       // 一次买几个, e.g. 2
+	debugSw       = os.Getenv("DEBUGSW")
 )
 
 var boughtNum = 0
@@ -94,6 +95,8 @@ func runTask() {
 	foundAvailable := false
 	var fqn, planCode, datacenter string
 	datacenterOptions := strings.Split(datacenterenv, ",")
+	fqnOptions := strings.Split(fqncode, ",")
+
 	triedTimes += 1
 	log.Println("-----------------------------------------------")
 	log.Printf("Number of runs: %d\n", triedTimes)
@@ -115,7 +118,7 @@ func runTask() {
 				log.Printf("Datacenter: %s\n", datacenter)
 				log.Println("------------------------")
 
-				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && fqncode == fqn {
+				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && Contains(fqnOptions, fqn) {
 					foundAvailable = true
 					break
 				}
@@ -136,6 +139,10 @@ func runTask() {
 
 	msg_available := fmt.Sprintf("🔥 有货啦: \n地区: %s\n型号: %s\n配置: %s\n", datacenter, plancode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_available)
+
+	if debugSw == "true" {
+		os.Exit(0)
+	}
 
 	log.Println("Create cart")
 	var cartResult map[string]interface{}
