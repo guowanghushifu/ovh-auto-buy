@@ -32,10 +32,10 @@ services:
             - TZ=Asia/Shanghai
         image: guowanghushifu/ovh-auto-buy:latest
 ```
-Some Env Para Explain:
+Some Env Explain:
 - BUYNUM: How many servers to buy, e.g. 2
 - DATACENTER: Which Datacenter to buy, e.g. `"sbg,rbx,fra"`. If you don't need to filter datacenter, `set it to "any"`
 - FREQUENCY: How many seconds to sleep between each try, e.g. 30
-- FQN: The detailed configration of your PLANCODE,find it in the json file. e.g. `"24sk20.ram-32g-ecc-2133.softraid-2x450nvme"`. If you don't need to filter FQN, `set it to "any"`
+- FQN: The detailed configration of your PLANCODE. e.g. `"24sk20.ram-32g-ecc-2133.softraid-2x450nvme"`. If you don't need to filter FQN, `set it to "any"`. If you don't know what to set, tpye `"hoho"`, run the docker once, find FQN list in the log, then modify this to the right one.
 - AUTOPAY: Auto pay bill, e.g. true
 
