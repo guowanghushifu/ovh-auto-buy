@@ -113,9 +113,7 @@ func runTask() {
 				availability := dc["availability"].(string)
 				datacenter = dc["datacenter"].(string)
 
-				log.Printf("FQN: %s\n", fqn)
-				log.Printf("Availability: %s\n", availability)
-				log.Printf("Datacenter: %s\n", datacenter)
+				log.Printf("[FQN]: %s\n[DC]: %s -/- [Avail]: %s\n", fqn, datacenter, availability)
 				log.Println("------------------------")
 
 				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && Contains(fqnOptions, fqn) {
