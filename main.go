@@ -41,6 +41,14 @@ var buyNumInt = 1
 var triedTimes = 0
 
 func Contains(arr []string, target string) bool {
+	if len(arr) == 1 && arr[0] == "" {
+		return true
+	}
+
+	if target == "any" {
+		return true
+	}
+
 	for _, s := range arr {
 		if s == target {
 			return true
@@ -113,9 +121,11 @@ func runTask() {
 				availability := dc["availability"].(string)
 				datacenter = dc["datacenter"].(string)
 
-				log.Printf("[FQN]: %s", fqn)
-				log.Printf("[DC]: %s -/- [Avail]: %s\n", datacenter, availability)
-				log.Println("------------------------")
+				if triedTimes < 3 || Contains(fqnOptions, fqn) {
+					log.Printf("[FQN]: %s", fqn)
+					log.Printf("[DC]: %s -/- [Avail]: %s\n", datacenter, availability)
+					log.Println("------------------------")
+				}
 
 				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && Contains(fqnOptions, fqn) {
 					foundAvailable = true
