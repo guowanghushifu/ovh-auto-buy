@@ -121,7 +121,7 @@ func runTask() {
 				availability := dc["availability"].(string)
 				datacenter = dc["datacenter"].(string)
 
-				if triedTimes < 3 || Contains(fqnOptions, fqn) {
+				if triedTimes < 10 || Contains(fqnOptions, fqn) {
 					log.Printf("[FQN]: %s", fqn)
 					log.Printf("[DC]: %s -/- [Avail]: %s\n", datacenter, availability)
 					log.Println("------------------------")
