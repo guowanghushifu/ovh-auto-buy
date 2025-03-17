@@ -77,6 +77,7 @@ func printEnvVars() {
 		{"AUTOPAY", autopay},
 		{"FREQUENCY", frequency},
 		{"BUYNUM", buyNum},
+		{"USER_TAG", userTag},
 	}
 
 	log.Println("**********ALL ENV**********：")
