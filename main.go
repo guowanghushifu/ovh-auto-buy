@@ -33,6 +33,7 @@ var (
 	autopay       = os.Getenv("AUTOPAY")      // 是否自动支付, e.g. true
 	frequency     = os.Getenv("FREQUENCY")    // 检查频率单位为秒, e.g. 5
 	buyNum        = os.Getenv("BUYNUM")       // 一次买几个, e.g. 2
+	userTag       = os.Getenv("USER_TAG")
 	debugSw       = os.Getenv("DEBUGSW")
 )
 
@@ -121,9 +122,9 @@ func runTask() {
 				availability := dc["availability"].(string)
 				datacenter = dc["datacenter"].(string)
 
-				if triedTimes < 10 || Contains(fqnOptions, fqn) {
+				if triedTimes < 6 || Contains(fqnOptions, fqn) {
 					log.Printf("[FQN]: %s", fqn)
-					log.Printf("[DC]: %s -/- [Avail]: %s\n", datacenter, availability)
+					log.Printf("[DC] : %s -/- [Avail]: %s\n", datacenter, availability)
 					log.Println("------------------------")
 				}
 
@@ -146,7 +147,7 @@ func runTask() {
 		return
 	}
 
-	msg_available := fmt.Sprintf("🔥 有货啦: \n地区: %s\n型号: %s\n配置: %s\n", datacenter, plancode, fqn)
+	msg_available := fmt.Sprintf("🔥 提醒用户: %s 有货啦:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, plancode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_available)
 
 	if debugSw == "true" {
@@ -278,7 +279,7 @@ func runTask() {
 
 	boughtNum += 1
 
-	msg_ordered := fmt.Sprintf("🎉 订购成功: \n地区: %s\n型号: %s\n配置: %s\n", datacenter, plancode, fqn)
+	msg_ordered := fmt.Sprintf("🎉 用户: %s 订购成功:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, plancode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_ordered)
 
 	if boughtNum >= buyNumInt {
