@@ -29,6 +29,7 @@ services:
             - AUTOPAY=true
             - FREQUENCY=30
             - BUYNUM=1
+            - USER_TAG=your_name
             - TZ=Asia/Shanghai
         image: guowanghushifu/ovh-auto-buy:latest
 ```
@@ -38,4 +39,5 @@ Some Env Explain:
 - FREQUENCY: How many seconds to sleep between each try, e.g. 30
 - FQN: The detailed configration of your PLANCODE. e.g. `"24sk20.ram-32g-ecc-2133.softraid-2x450nvme"`. It should be a single value or comma-separated list. If you don't need to filter FQN, set it to `"any"`. If you don't know what to set, tpye `"hoho"`, run the docker once, find FQN list at the **HEAD** of log, then modify this to the right one.
 - AUTOPAY: Auto pay bill, e.g. true
+- USER_TAG: Your name or something to show in telegram notification.
 
