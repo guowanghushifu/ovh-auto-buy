@@ -40,6 +40,7 @@ var (
 var boughtNum = 0
 var buyNumInt = 1
 var triedTimes = 0
+var lastTrySucess = 0
 
 func Contains(arr []string, target string) bool {
 	if len(arr) == 1 && arr[0] == "" {
@@ -89,6 +90,7 @@ func printEnvVars() {
 
 func runTask() {
 
+	lastTrySucess = 0
 	client, err := ovh.NewClient(region, appKey, appSecret, consumerKey)
 	if err != nil {
 		log.Printf("Failed to create OVH client: %v\n", err)
@@ -279,6 +281,7 @@ func runTask() {
 	log.Println("Ordered!")
 
 	boughtNum += 1
+	lastTrySucess = 1
 
 	msg_ordered := fmt.Sprintf("🎉 用户: %s 订购成功:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, plancode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_ordered)
@@ -320,6 +323,10 @@ func main() {
 
 	for {
 		runTask()
-		time.Sleep(time.Duration(freq) * time.Second)
+		if lastTrySucess == 1 && debugSw == "fast" {
+			time.Sleep(1 * time.Second)
+		} else {
+			time.Sleep(time.Duration(freq) * time.Second)
+		}
 	}
 }
