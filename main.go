@@ -19,22 +19,23 @@ import (
 )
 
 var (
-	appKey        = os.Getenv("APP_KEY")      // OVH的应用key
-	appSecret     = os.Getenv("APP_SECRET")   // OVH的应用secret
-	consumerKey   = os.Getenv("CONSUMER_KEY") // OVH的消费者key
-	region        = os.Getenv("REGION")       // 区域设置为, e.g. ovh-eu
-	tgtoken       = os.Getenv("TG_TOKEN")     // 你的Telegram Bot Token
-	tgchatid      = os.Getenv("TG_CHATID")    // 你希望发送消息的Telegram Chat ID
-	zone          = os.Getenv("ZONE")         // OVH子公司区域设置, e.g. IE
-	plancode      = os.Getenv("PLANCODE")     // 需要购买的产品的planCode, e.g. 25skleb01
-	fqncode       = os.Getenv("FQN")          // 需要购买的产品的FQN, e.g. 24sk20.ram-32g-ecc-2133.softraid-2x450nvme
-	optionsenv    = os.Getenv("OPTIONS")      // 选择的配置用逗号分隔, e.g. bandwidth-300-25skle,ram-32g-ecc-2400-25skle,softraid-2x450nvme-25skle
-	datacenterenv = os.Getenv("DATACENTER")   // 选择的配置用逗号分隔, e.g. gra,rbx,bhs
-	autopay       = os.Getenv("AUTOPAY")      // 是否自动支付, e.g. true
-	frequency     = os.Getenv("FREQUENCY")    // 检查频率单位为秒, e.g. 5
-	buyNum        = os.Getenv("BUYNUM")       // 一次买几个, e.g. 2
-	userTag       = os.Getenv("USER_TAG")
-	debugSw       = os.Getenv("DEBUGSW")
+	appKey        = os.Getenv("APP_KEY")       // OVH的应用key
+	appSecret     = os.Getenv("APP_SECRET")    // OVH的应用secret
+	consumerKey   = os.Getenv("CONSUMER_KEY")  // OVH的消费者key
+	region        = os.Getenv("REGION")        // 区域设置为, e.g. ovh-eu
+	tgtoken       = os.Getenv("TG_TOKEN")      // 你的Telegram Bot Token
+	tgchatid      = os.Getenv("TG_CHATID")     // 你希望发送消息的Telegram Chat ID
+	zone          = os.Getenv("ZONE")          // OVH子公司区域设置, e.g. IE
+	plancode      = os.Getenv("PLANCODE")      // 需要购买的产品的planCode, e.g. 25skleb01
+	fqncode       = os.Getenv("FQN")           // 需要购买的产品的FQN, e.g. 24sk20.ram-32g-ecc-2133.softraid-2x450nvme
+	optionsenv    = os.Getenv("OPTIONS")       // 选择的配置用逗号分隔, e.g. bandwidth-300-25skle,ram-32g-ecc-2400-25skle,softraid-2x450nvme-25skle
+	datacenterenv = os.Getenv("DATACENTER")    // 选择的配置用逗号分隔, e.g. gra,rbx,bhs
+	autopay       = os.Getenv("AUTOPAY")       // 是否自动支付, e.g. true
+	frequency     = os.Getenv("FREQUENCY")     // 检查频率单位为秒, e.g. 5
+	buyNum        = os.Getenv("BUYNUM")        // 一次买几个, e.g. 2
+	userTag       = os.Getenv("USER_TAG")      // 用户标记，用于多个用户同时抢的时候，通知信息里面区分
+	debugSw       = os.Getenv("DEBUGSW")       // 调试标记
+	oneHourHigh   = os.Getenv("ONE_HOUR_HIGH") // 仅仅抢购1H-high的机器，表示大批量放机
 )
 
 var boughtNum = 0
@@ -79,11 +80,12 @@ func printEnvVars() {
 		{"FREQUENCY", frequency},
 		{"BUYNUM", buyNum},
 		{"USER_TAG", userTag},
+		{"ONE_HOUR_HIGH", oneHourHigh},
 	}
 
 	log.Println("**********ALL ENV**********：")
 	for _, v := range envVars {
-		log.Printf("%-12s = %s\n", v.Name, v.Val)
+		log.Printf("%-16s = %s\n", v.Name, v.Val)
 	}
 	log.Println("***************************：")
 }
@@ -131,7 +133,18 @@ func runTask() {
 					log.Println("------------------------")
 				}
 
-				if availability != "unavailable" && Contains(datacenterOptions, datacenter) && Contains(fqnOptions, fqn) {
+				itemAvail := false
+				if oneHourHigh == "true" {
+					if availability == "1H-high" {
+						itemAvail = true
+					}
+				} else {
+					if availability != "unavailable" {
+						itemAvail = true
+					}
+				}
+
+				if itemAvail && Contains(datacenterOptions, datacenter) && Contains(fqnOptions, fqn) {
 					foundAvailable = true
 					break
 				}
