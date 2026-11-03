@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -19,23 +20,23 @@ import (
 )
 
 var (
-	appKey        = os.Getenv("APP_KEY")       // OVH的应用key
-	appSecret     = os.Getenv("APP_SECRET")    // OVH的应用secret
-	consumerKey   = os.Getenv("CONSUMER_KEY")  // OVH的消费者key
-	region        = os.Getenv("REGION")        // 区域设置为, e.g. ovh-eu
-	tgtoken       = os.Getenv("TG_TOKEN")      // 你的Telegram Bot Token
-	tgchatid      = os.Getenv("TG_CHATID")     // 你希望发送消息的Telegram Chat ID
-	zone          = os.Getenv("ZONE")          // OVH子公司区域设置, e.g. IE
-	plancode      = os.Getenv("PLANCODE")      // 需要购买的产品的planCode, e.g. 25skleb01
-	fqncode       = os.Getenv("FQN")           // 需要购买的产品的FQN, e.g. 24sk20.ram-32g-ecc-2133.softraid-2x450nvme
-	optionsenv    = os.Getenv("OPTIONS")       // 选择的配置用逗号分隔, e.g. bandwidth-300-25skle,ram-32g-ecc-2400-25skle,softraid-2x450nvme-25skle
-	datacenterenv = os.Getenv("DATACENTER")    // 选择的配置用逗号分隔, e.g. gra,rbx,bhs
-	autopay       = os.Getenv("AUTOPAY")       // 是否自动支付, e.g. true
-	frequency     = os.Getenv("FREQUENCY")     // 检查频率单位为秒, e.g. 5
-	buyNum        = os.Getenv("BUYNUM")        // 一次买几个, e.g. 2
-	userTag       = os.Getenv("USER_TAG")      // 用户标记，用于多个用户同时抢的时候，通知信息里面区分
-	debugSw       = os.Getenv("DEBUGSW")       // 调试标记
-	oneHourHigh   = os.Getenv("ONE_HOUR_HIGH") // 仅仅抢购1H-high的机器，表示大批量放机
+	appKey         = os.Getenv("APP_KEY")       // OVH的应用key
+	appSecret      = os.Getenv("APP_SECRET")    // OVH的应用secret
+	consumerKey    = os.Getenv("CONSUMER_KEY")  // OVH的消费者key
+	region         = os.Getenv("REGION")        // 区域设置为, e.g. ovh-eu
+	tgtoken        = os.Getenv("TG_TOKEN")      // 你的Telegram Bot Token
+	tgchatid       = os.Getenv("TG_CHATID")     // 你希望发送消息的Telegram Chat ID
+	zone           = os.Getenv("ZONE")          // OVH子公司区域设置, e.g. IE
+	targetPlanCode = os.Getenv("PLANCODE")      // 需要购买的产品的planCode, e.g. 25skleb01
+	fqncode        = os.Getenv("FQN")           // 需要购买的产品的FQN, e.g. 24sk20.ram-32g-ecc-2133.softraid-2x450nvme
+	optionsenv     = os.Getenv("OPTIONS")       // 选择的配置用逗号分隔, e.g. bandwidth-300-25skle,ram-32g-ecc-2400-25skle,softraid-2x450nvme-25skle
+	datacenterenv  = os.Getenv("DATACENTER")    // 选择的配置用逗号分隔, e.g. gra,rbx,bhs
+	autopay        = os.Getenv("AUTOPAY")       // 是否自动支付, e.g. true
+	frequency      = os.Getenv("FREQUENCY")     // 检查频率单位为秒, e.g. 5
+	buyNum         = os.Getenv("BUYNUM")        // 一次买几个, e.g. 2
+	userTag        = os.Getenv("USER_TAG")      // 用户标记，用于多个用户同时抢的时候，通知信息里面区分
+	debugSw        = os.Getenv("DEBUGSW")       // 调试标记
+	oneHourHigh    = os.Getenv("ONE_HOUR_HIGH") // 仅仅抢购1H-high的机器，表示大批量放机
 )
 
 var boughtNum = 0
@@ -72,7 +73,7 @@ func printEnvVars() {
 		{"TG_TOKEN", tgtoken},
 		{"TG_CHATID", tgchatid},
 		{"ZONE", zone},
-		{"PLANCODE", plancode},
+		{"PLANCODE", targetPlanCode},
 		{"FQN", fqncode},
 		{"OPTIONS", optionsenv},
 		{"DATACENTER", datacenterenv},
@@ -100,14 +101,14 @@ func runTask() {
 	}
 
 	var result []map[string]interface{}
-	err = client.Get("/dedicated/server/datacenter/availabilities", &result)
+	err = client.Get("/dedicated/server/datacenter/availabilities?planCode="+url.QueryEscape(targetPlanCode), &result)
 	if err != nil {
 		log.Printf("Failed to get datacenter availabilities: %v\n", err)
 		return
 	}
 
 	foundAvailable := false
-	var fqn, planCode, datacenter string
+	var fqn, availablePlanCode, datacenter string
 	datacenterOptions := strings.Split(datacenterenv, ",")
 	fqnOptions := strings.Split(fqncode, ",")
 
@@ -117,9 +118,9 @@ func runTask() {
 	log.Println("-----------------------------------------------")
 
 	for _, item := range result {
-		if item["planCode"] == plancode {
+		if item["planCode"] == targetPlanCode {
 			fqn = item["fqn"].(string)
-			planCode = item["planCode"].(string)
+			availablePlanCode = item["planCode"].(string)
 			datacenters := item["datacenters"].([]interface{})
 
 			for _, dcInfo := range datacenters {
@@ -163,7 +164,7 @@ func runTask() {
 		return
 	}
 
-	msg_available := fmt.Sprintf("🔥 提醒用户: %s 有货啦:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, plancode, fqn)
+	msg_available := fmt.Sprintf("🔥 提醒用户: %s 有货啦:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, targetPlanCode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_available)
 
 	if debugSw == "true" {
@@ -193,7 +194,7 @@ func runTask() {
 	log.Println("Put item into cart")
 	var itemResult map[string]interface{}
 	err = client.Post("/order/cart/"+cartID+"/eco", map[string]interface{}{
-		"planCode":    planCode,
+		"planCode":    availablePlanCode,
 		"pricingMode": "default",
 		"duration":    "P1M",
 		"quantity":    1,
@@ -296,7 +297,7 @@ func runTask() {
 	boughtNum += 1
 	lastTrySucess = 1
 
-	msg_ordered := fmt.Sprintf("🎉 用户: %s 订购成功:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, plancode, fqn)
+	msg_ordered := fmt.Sprintf("🎉 用户: %s 订购成功:\n地区: %s\n型号: %s\n配置: %s\n", userTag, datacenter, targetPlanCode, fqn)
 	sendTelegramMsg(tgtoken, tgchatid, msg_ordered)
 
 	if boughtNum >= buyNumInt {
