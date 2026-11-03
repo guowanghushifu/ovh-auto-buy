@@ -140,7 +140,7 @@ func runTask() {
 						itemAvail = true
 					}
 				} else {
-					if availability != "unavailable" {
+					if availability != "unavailable" && availability != "unknown" && availability != "comingSoon" {
 						itemAvail = true
 					}
 				}
